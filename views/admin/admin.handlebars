@@ -1,0 +1,164 @@
+<style>
+    td, th{
+        border: 1px silver solid;
+        margin: 5px;
+        padding: 5px;
+        border-collapse: collapse;
+    }
+    table{
+        border-collapse: collapse;
+        margin: 10px;
+    }
+
+</style>
+<div class="form">
+    <form action="/additem" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+        <label for="seo">SEO url</label>
+        <input type="text" name="seo" id="seo" class="form-control" placeholder="seo" required>
+        </div>
+        <div class="form-group">
+        <label for="title">Заголовок сторінки</label>
+        <input type="text" name="title" id="title" class="form-control" placeholder="Title" required>
+        </div>
+        <div class="form-group">
+        <label for="price">Ціна товару</label>
+        <input type="text" name="price" id="price" class="form-control" placeholder="Ціна">
+        </div>
+        <div class="input-field col s6">
+        <label for="decript">Descriptions</label>
+        <input type="text" name="descript" id="decript" class="validate">
+        </div>
+        <div class="input-field col s12">
+        <textarea name="about" id="textarea1" class="materialize-textarea" rows="5"></textarea>
+            <label for="textarea1">Детальний опис товару</label>
+        </div>
+        <label for="picture">Головна фотографія товару</label>
+     <div class="row">
+        <div class="file-field input-field col s12 l6">
+            <div class="btn">
+                <span>File</span>
+            <input type="file" name="picture" id="picture" required>
+            </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" type="text">
+            </div>
+        </div>
+     </div>
+        <button type="button" class="btn pink lighten-1 waves-effect waves-light" id="addFormFile">Додати ще фото</button>
+            <div class="form-inline" id="formFile"></div>
+        <div class="input-field">
+        <button type="submit" class="btn waves-effect waves-light">Зберегти <i class="material-icons right">send</i></button>
+        </div>
+    </form>
+</div>
+<div class="items">
+    <table>
+        <tbody class="table">
+        <th>Title</th><th>SEO</th><th>description</th><th>About</th><th>Date</th><th>image</th><th>price</th><th>Del</th>
+        </tbody>
+    </table>
+</div>
+<div id="modal1" class="modal modal-fixed-footer">
+    <div class="modal-content">
+        <h4>Modal Header</h4>
+        <p>Ви точно хочете видалити ?</p>
+    </div>
+    <div class="modal-footer">
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect waves-green btn">Ні</a>
+        <a href="" id="yes" class="modal-action modal-close waves-effect waves-green btn">Так</a>
+    </div>
+</div>
+<script>
+   window.onload = function () {
+       let ddd = '';
+       const items = document.querySelector('.table');
+       const xhr = new XMLHttpRequest();
+       xhr.open('POST', '/admin/items');
+       xhr.send();
+       xhr.onreadystatechange = function () {
+           if (xhr.readyState != 4) return;
+           let res = JSON.parse(this.responseText);
+           res.forEach(function (x) {
+               const tr = document.createElement('tr');
+               tr.dataset.id = x['_id'];
+               const key = ['title', 'seo', 'description', 'about', 'date', {'image': 'path'}, {'price': 'current'}];
+               let it = key[Symbol.iterator]();
+               for (let i = 0; i < key.length; i++) {
+                   const td = document.createElement('td');
+                   let ss = it.next().value;
+                   if (typeof ss == "object") {
+                       Object.keys(ss).forEach(function (rr) {
+                           td.appendChild(document.createTextNode((x[rr][ss[rr]])));
+                       }, ss)
+                   } else
+                       td.innerText = x[ss];
+                   tr.appendChild(td);
+
+               }
+               ;
+               const btn = document.createElement("button");
+               const td = document.createElement('td');
+               btn.innerHTML = 'delete';
+               btn.classList.add('btn');
+               btn.classList.add('waves-effect');
+               btn.classList.add('waves-light');
+               btn.classList.add('blue-grey');
+               btn.dataset.id = 'btn';
+               btn.value = x['_id'];
+               td.appendChild(btn);
+               tr.appendChild(td);
+               items.appendChild(tr);
+           });
+           const button = document.querySelectorAll("button[data-id='btn']");
+           for (let i = 0; i < button.length; i++) {
+               button[i].addEventListener('click', function (e) {
+                   ddd = this.value;
+                   var elem = document.querySelector('.modal');
+                   let options = {opacity: 0.5, dismissible: false, startingTop: '20%'};
+                   var instance = M.Modal.init(elem, options);
+                   instance.open();
+               });
+           };
+       };
+       let q = 1;
+       const btnAddFile = document.querySelector('#addFormFile');
+       const formFile = document.querySelector('#formFile');
+       btnAddFile.addEventListener('click', function () {
+           const addForm = document.createElement('div');
+           addForm.classList.add('file-field');
+           addForm.classList.add('input-field');
+           addForm.innerHTML = `<div class="btn"><span>File</span><input type="file" name="picture${q}" required></div><div class="file-path-wrapper">
+        <input class="file-path validate" type="text">
+      </div>`;
+           formFile.appendChild(addForm);
+           q++;
+       });
+
+
+       function deleteTest(ddd) {
+           console.log(ddd);
+           const xhr = new XMLHttpRequest();
+           const del = document.querySelector(`tr[data-id="${ddd}"]`);
+           xhr.open('POST', '/admin/deleteitem');
+           xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+           xhr.send(`id=${ddd}`);
+           xhr.onloadend = function () {
+               if (this.responseText === 'success') del.remove();
+           };
+       };
+       const yes = document.querySelector('#yes');
+       yes.addEventListener('click', function (e) {
+           e.preventDefault();
+
+           deleteTest(ddd);
+       });
+   };
+</script>
+{{#section 'style'}}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+{{/section}}
+{{#section 'scripts'}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+{{/section}}

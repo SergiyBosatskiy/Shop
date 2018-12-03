@@ -1,0 +1,35 @@
+<div class="zagolovok"><h1> {{title}}</h1></div>
+<div class="item">
+
+    <div class="full-image">
+        <a href="{{mainimage}}" data-lightbox="image-1" data-title="{{title}}"><img src="{{mainimage}}" alt="{{title}}" title="{{title}}"></a>
+
+        <div class="mini-image">
+        <div class="carousel">
+       {{#each image}}
+        <a class="carousel-item" href="{{this}}" data-lightbox="roadtrip"><img src="{{this}}" alt="{{@index}}" title="{{@index}}"></a>
+        {{/each}}
+        </div></div></div>
+    <div class="about"><p>{{{about}}}</p></div>
+    <div class="price"><p>cena {{price}}</p></div>
+
+</div>
+{{#section 'style'}}
+<link href="css/lightbox.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+{{/section}}
+{{#section 'scripts'}}
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="js/lightbox.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+<script>
+    lightbox.option({
+        'resizeDuration': 200,
+        'wrapAround': true,
+        'albumLabel': 'Фото %1 із %2'
+    });
+    var elem = document.querySelector('.carousel');
+    var options = {  };
+    var instance = M.Carousel.init(elem, options);
+</script>
+{{/section}}
